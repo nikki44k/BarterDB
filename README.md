@@ -1,4 +1,4 @@
-					Barter DataBase Project -NIKKI
+					Barter DataBase Project -NIKKI And Aditya
 		
 	-Created a php file called db.php to connect my database (barterdb)
 		Sets the PDO error mode to PDO::ERRMODE_EXCEPTION to throw exceptions in case of errors during database operations.
