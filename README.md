@@ -1,278 +1,303 @@
-					Barter DataBase Project -NIKKI And Aditya
-		
-	-Created a php file called db.php to connect my database (barterdb)
-		Sets the PDO error mode to PDO::ERRMODE_EXCEPTION to throw exceptions in case of errors during database operations.
-		This file provides the necessary database connection for all other scripts that interact with the database.
+# Barter Database Project
 
-	-barterdb.sql - Database Schema and Structure
-	 	This file defines the structure of the barterdb database, which includes several tables for users, items, transactions, and other necessary functionalities.
-		The main components include:
-			Users Table (users)
-			Stores user details such as user_id, name, email, password_hash, phone, address, role, status, and created_at.
-			The role column differentiates between normal users and admins.
-			The status column indicates whether a user is active or suspended.
-			
-			Items Table (items)
-			Stores information about items available for trade, including item_id, user_id (linked to the user who posted the item), name, description, item_type (product or service), quantity, and status.
-			The user_id column links each item to a specific user.
-			The status column can be either 'available' (item is available for trade) or 'traded' (item has been traded).
-			
-			Transactions Table (transactions)
-			Stores details about transactions between users, such as transaction_id, item_id (linked to the item being traded), user_id (user initiating the trade), partner_id (the partner user), 
-			hash_key (unique trade identifier), status, cost_summary (total cost associated with the transaction), and start_date/end_date (transaction duration).
-			The status column tracks whether the transaction is active, completed, or cancelled.
-			The table has foreign keys linking to the items and users tables.
-			
-			Equivalence Table (equivalence)
-			Stores the equivalence values between different items, allowing users to exchange items with different values.
-			The table has columns for item1, item2, and equivalent_value, which represents how much of one item equals another.
-			
-			Contact Messages Table (contact_messages)
-			Stores user-submitted messages on the contact page, including message_id, name, email, message, and the time the message was received (received_at).
-			This allows users to send inquiries or feedback through the website.
-			
-			Alterations and Updates
-			Adds a new value column in the items table for item value (used in the equivalence system).
-			The role column for users is added or updated to differentiate between user roles (admin and regular users).
-			Example query to update user roles, specifically for promoting a user to an admin.
-				
-	-index.html - Home Page
-	This is the main landing page for your BarterDB website. It typically includes:
+This repository contains the source code and database schema for the BarterDB project, built with PHP, MySQL, HTML/CSS, and JavaScript. BarterDB is a secure, anonymous platform for users to exchange items based on equivalence values and hash-based trade identifiers.
 
-		A welcoming message or introduction to the barter system.
+---
 
-		Navigation links to other pages like About, Services, Contact, Sign Up, and Sign In.
+## Table of Contents
 
-		Display of key information like featured items or services available for trade.
+- [Database](#database)  
+  - [db.php](#dbphp)  
+  - [barterdb.sql](#barterdbsql)  
+- [Front-End Pages](#front-end-pages)  
+  - [index.html](#indexhtml)  
+  - [about.html](#abouthtml)  
+  - [services.html](#serviceshtml)  
+  - [contact.html](#contacthtml)  
+  - [signin.html](#signinhtml)  
+  - [signup.html](#signuphtml)  
+- [Back-End Scripts](#back-end-scripts)  
+  - [contact.php](#contactphp)  
+  - [login.php](#loginphp)  
+  - [signup.php](#signupphp)  
+  - [registration.php](#registrationphp)  
+  - [user_dashboard.php](#user_dashboardphp)  
+  - [admin_dashboard.php](#admin_dashboardphp)  
+  - [admin_actions.php](#admin_actionsp hp)  
+  - [post_item.php](#post_itemphp)  
+  - [handle_transaction.php](#handle_transactionphp)  
+  - [trade.php](#tradephp)  
+  - [match_items.php](#match_itemsphp)  
+  - [get_partner_items.php](#get_partner_itemsphp)  
+  - [view_items.php](#view_itemsphp)  
+- [Public Assets](#public-assets)  
+- [Getting Started](#getting-started)  
+  - [Set Up the Database](#set-up-the-database)  
+  - [Configure `db.php`](#configure-dbphp)  
+  - [Run a Local Server](#run-a-local-server)  
+  - [Register and Use the Application](#register-and-use-the-application)  
+- [License](#license)  
 
-	-about.html - About Page
-	This page provides information about the BarterDB platform, explaining its mission, how it works, and the benefits of using the system. It could include:
+---
 
-		A brief history or background of the project.
-		An explanation of how the barter system works (e.g., how users can trade items securely).
-		Details about the security measures in place (e.g., anonymous trading, hash key system).
+## Database
 
-	-services.html - Services Page
-	This page outlines the services provided by BarterDB. It can include:
+### `db.php`
+- Establishes a PDO connection to the `barterdb` database.
+- Sets `PDO::ERRMODE_EXCEPTION` to throw exceptions on errors.
+- Provides the database connection object for all other scripts.
 
-		How the equivalence values work in the system.
-		Information about the secure exchange process, including how the hash key system works.
+### `barterdb.sql`
+Defines the schema and initial data for BarterDB:
+- **Users Table (`users`)**  
+  - Columns: `user_id`, `name`, `email`, `password_hash`, `phone`, `address`, `role`, `status`, `created_at`.  
+  - `role` differentiates between normal users and admins.  
+  - `status` indicates whether a user is `active` or `suspended`.
 
-	-contact.html - Contact Page (Frontend)
-	This page provides a contact form for users to send messages or inquiries. It typically includes:
+- **Items Table (`items`)**  
+  - Columns: `item_id`, `user_id` (FK), `name`, `description`, `item_type` (`product` or `service`), `quantity`, `value`, `status`.  
+  - `user_id` links each item to its owner.  
+  - `status` can be `available` or `traded`.  
+  - `value` is used in the equivalence system.
 
-		A form with fields for the user's name, email, and message.
-		Instructions for users to reach out for support, feedback, or general inquiries.
-		A submit button to send the contact message to the backend script (contact.php).
+- **Transactions Table (`transactions`)**  
+  - Columns: `transaction_id`, `item_id` (FK), `user_id` (initiator, FK), `partner_id` (FK), `hash_key`, `status`, `cost_summary`, `start_date`, `end_date`.  
+  - Tracks ongoing and completed trades.  
+  - `status` can be `active`, `completed`, or `canceled`.
 
-	-contact.php - Contact Form Processing (Backend)
-	This PHP file processes the contact form submitted on contact.html. It typically:
+- **Equivalence Table (`equivalence`)**  
+  - Columns: `id`, `item1`, `item2`, `equivalent_value`.  
+  - Defines how much of one item equals another.
 
-		Retrieves the form data (name, email, and message).
-		Validates the form data (e.g., ensuring that the email is valid and the message is not empty).
-		Stores the submitted message in the database (usually in the contact_messages table).
-		
-	-signin.html - Sign In Page (Frontend)
-	This page allows users to sign in to their BarterDB accounts. It includes:
+- **Contact Messages Table (`contact_messages`)**  
+  - Columns: `message_id`, `name`, `email`, `message`, `received_at`.  
+  - Stores messages submitted via the contact form.
 
-		A form with fields for the user's name, email and password.
-		A submit button for submitting the login credentials.
-		A link to the registration page (signup.html) if the user doesn’t have an account.
+- **Schema Updates**  
+  - Adds a `value` column to `items` for item equivalence.  
+  - Updates `role` column in `users` to differentiate admins.  
+  - Includes example SQL for promoting a user to admin.
 
-	-login.php - Login Script (Backend)
-	This PHP file processes the sign-in form submitted on signin.html. It typically:
+---
 
-		Retrieves the email and password from the form.
-		Validates the credentials by comparing them with the database (checking the hashed password).
-		If the login is successful, the user is redirected to their dashboard or home page.
-		If the login fails, an error message is displayed prompting the user to try again.
+## Front-End Pages
 
-	-signup.html - Sign Up Page (Frontend)
-	This page allows new users to register for BarterDB. It includes:
+### `index.html`
+- Main landing page.  
+- Features:  
+  - Welcome message.  
+  - Navigation links to About, Services, Contact, Sign Up, and Sign In.  
+  - Optional: featured items or services.
 
-		A form with fields for the user's name, email, phone, password, and address.
-		A submit button for submitting the registration details.
-		A link to the sign-in page (signin.html) for users who already have an account.
+### `about.html`
+- Project overview and background.  
+- Explains:  
+  - Mission of BarterDB.  
+  - How the barter system works (anonymous trading, hash key security).  
+  - Security measures.
 
-	-signup.php - Sign Up Script (Backend)
-	This PHP file processes the sign-up form submitted on signup.html. It typically:
+### `services.html`
+- Outlines BarterDB services.  
+- Describes:  
+  - Equivalence value calculations.  
+  - Secure exchange process using hash keys.
 
-		Retrieves the form data (name, email, password, etc.).
-		Validates the data (e.g., checking if the email is unique, ensuring that required fields are not empty).
-		Hashes the password before storing it in the database for security.
-		Adds the new user’s information into the users table in the database.
-		Redirects the user to the login page or their dashboard after successful registration.
+### `contact.html`
+- Contact form for user inquiries.  
+- Fields:  
+  - Name  
+  - Email  
+  - Message  
+- Form submission triggers `contact.php`.
 
-	-registration.php - Alternative Registration Handling (Backend)
-	This file could be an alternative method for handling the registration process, depending on the project setup. It may:
+### `signin.html`
+- User login page.  
+- Fields:  
+  - Email  
+  - Password  
+- Links to `signup.html` for new users.
 
-		Include more complex registration features (e.g., assigning a default role, sending a verification email).
-		Perform additional checks like confirming that the user is not already registered.
+### `signup.html`
+- User registration page.  
+- Fields:  
+  - Name  
+  - Email  
+  - Phone  
+  - Password  
+  - Address  
+- Links to `signin.html` for existing users.
 
-	-user_dashboard.php file is designed to display and manage various aspects of a user's activity on the platform. Here’s a breakdown of its features and functionalities:
+---
 
-		User Authentication and Authorization:
-			The page starts by checking if the user is logged in and has a "user" role. If not, they are redirected to the sign-in page.
-	
-		Displayed Information:
+## Back-End Scripts
 
-			Posted Items:
-			Displays all items posted by the logged-in user that are marked as 'available'. Each item is shown with its name, description, quantity, and value.
-			Users can initiate a trade by clicking a button next to each item, which leads to the match_items.php script to start the exchange process.
-		
-			All Available Items:
-			Displays items posted by other users that are available for trade. These are listed with their name, description, quantity, value, and the user ID of the poster.
-			
-			Active Transactions:
-			Displays ongoing trades in which the user is involved, either as the primary or partner user. This section includes the item name, trade status, partner ID, item value, and hash key for secure identification. 
-			For transactions where the user is the partner, options to accept or decline the trade are available.
-			
-			Completed Transactions:
-			Shows completed transactions that the user was involved in, with item name, trade status, partner ID, and hash key for each trade.
-			
-			Actions:
-			Initiating a Trade: Users can initiate a trade for their posted items by clicking the "Initiate Trade" button.
-		
-			Accepting/Declining Active Trades: Users who are partners in a trade can accept or decline the transaction via buttons on the dashboard.
-		
-			Link to Post New Item:
-			A link to post_item.php allows users to add new items to the platform.
-		
-		Overall, the user dashboard is designed to allow users to view and manage their items, transactions, and interactions with other users in the barter system.
+### `contact.php`
+- Processes contact form submissions from `contact.html`.  
+- Steps:  
+  1. Retrieve `name`, `email`, and `message` from `$_POST`.  
+  2. Validate inputs (e.g., non-empty, valid email).  
+  3. Insert message into `contact_messages` table.  
+  4. Redirect or show confirmation.
 
-	-admin_dashboard.php
-	The Admin Dashboard allows administrators to manage users and transactions within the BarterDB system. The functionalities presented in this file include:
+### `login.php`
+- Processes login requests from `signin.html`.  
+- Steps:  
+  1. Retrieve `email` and `password` from `$_POST`.  
+  2. Validate credentials by comparing hashed password against `users` table.  
+  3. On success: set session variables and redirect to dashboard.  
+  4. On failure: display error and prompt to retry.
 
-		User Management:
-	
-			View Users: Displays a table with all users, including their details such as user ID, name, email, phone, role, and status.
-		
-			Actions:
-				Suspend: Admins can suspend users by changing their status.
-				Delete User: Admins have the ability to delete users from the system.
-		
-			Each user is presented with a button to either suspend and delete them, which triggers a form submission to admin_actions.php.
-		
-		Transaction Management:
+### `signup.php`
+- Handles user registration from `signup.html`.  
+- Steps:  
+  1. Retrieve `name`, `email`, `phone`, `password`, and `address`.  
+  2. Validate inputs (unique email, required fields).  
+  3. Hash the password before storage.  
+  4. Insert new user into `users` table with default role `user`.  
+  5. Redirect to `signin.html` or user dashboard.
 
-			View Transactions: Shows a table of transactions, including item name, user and partner names, hash key, status, and available actions.
-		
-			Actions:
-				Mark as Completed: Admin can mark a transaction as completed.
-				Cancel Transaction: Admin can cancel an active transaction.
-				Each transaction has action buttons for the admin to control its status (active, completed, or canceled), which also submit to admin_actions.php.
+### `registration.php`
+- Alternative or extended registration handler.  
+- May include:  
+  - Assigning default roles.  
+  - Sending verification emails.  
+  - Additional validation checks.
 
-	-admin_actions.php file is responsible for managing administrative actions on the system. It ensures that only logged-in users with an "admin" role can perform actions 
-	such as suspending, deleting users, or managing transaction statuses.
+### `user_dashboard.php`
+- Displays and manages a user’s account activity.  
+- Features:  
+  - **Posted Items:**  
+    - Lists all `available` items posted by the logged-in user (`item_id`, `name`, `description`, `quantity`, `value`).  
+    - “Initiate Trade” button next to each item → calls `match_items.php`.  
+  - **All Available Items:**  
+    - Shows items from other users (`name`, `description`, `quantity`, `value`, `owner_id`).  
+  - **Active Transactions:**  
+    - Lists trades where the user is initiator or partner (`item_name`, `status`, `partner_id`, `value`, `hash_key`).  
+    - If user is partner, provides “Accept” or “Decline” buttons → calls `handle_transaction.php`.  
+  - **Completed Transactions:**  
+    - Shows all completed trades involving the user.  
+  - **Actions:**  
+    - Link to `post_item.php` to add a new item.
 
-		Key Functionalities:
-			
-			Admin Role Verification:
-			It starts by checking if the user is logged in and has admin privileges (via session data). 
-			If the user does not have admin rights, they are redirected to the login page.
-			
-			User Management:
-				Suspending a User: By changing the user's status to 'suspended' in the database.
-				Deleting a User: By removing the user from the users table entirely.
-			
-			Transaction Management:
-				Completed: Updates the transaction status to 'completed'.
-				Canceled: Changes the transaction status to 'canceled'.
-			
-			Form for Admin Actions:
-				A form is provided to submit the user ID and the desired action (suspend or delete). 
-				The admin can also submit a transaction ID along with the desired action (complete or cancel).
+### `admin_dashboard.php`
+- Admin control panel for managing users and transactions.  
+- **User Management:**  
+  - Table of all users (`user_id`, `name`, `email`, `phone`, `role`, `status`).  
+  - “Suspend” or “Delete” buttons → submit to `admin_actions.php`.  
+- **Transaction Management:**  
+  - Table of all transactions (`transaction_id`, `item_name`, `initiator_name`, `partner_name`, `hash_key`, `status`).  
+  - “Mark as Completed” or “Cancel” buttons → submit to `admin_actions.php`.  
 
-			Session Message:
-				After executing an action, a session message is set to notify the admin of the outcome
-			
-			Redirection:
-				After the action is completed, the admin is redirected back to the admin dashboard to maintain a smooth user experience.
+### `admin_actions.php`
+- Handles admin actions triggered from `admin_dashboard.php`.  
+- Validates that the current user has `admin` privileges.  
+- **User Management:**  
+  - **Suspend:** Update `users.status` to `suspended`.  
+  - **Delete:** Remove user from `users` table (cascade deletes related items/transactions).  
+- **Transaction Management:**  
+  - **Complete:** Update `transactions.status` to `completed`.  
+  - **Cancel:** Update `transactions.status` to `canceled`.  
+- Sets a session message indicating action outcome, then redirects back to `admin_dashboard.php`.
 
-	-post_item.php file is designed for both admins and users in the BarterDB system, with specific functionalities:
+### `post_item.php`
+- Allows users to post new items for trade; also used by admins for transaction management.  
+- **For Regular Users:**  
+  - Displays a form (`name`, `description`, `value`, `quantity`).  
+  - Validates inputs (non-empty fields).  
+  - Inserts new item into `items` table with status `available`.  
+  - Redirects to `user_dashboard.php`.  
+- **For Admins:**  
+  - Provides additional controls to complete or cancel transactions via form submissions.
 
-		Admin Privileges: The file ensures that only admins can perform actions such as suspending or deleting users, as well as 
-		completing or canceling transactions. It validates that the logged-in user is an admin before allowing access to these features.
+### `handle_transaction.php`
+- Manages accepting or declining trades on `user_dashboard.php`.  
+- **Session Check:** Redirect to login if user is not authenticated.  
+- Fetches the `transaction_id` from `$_POST`.  
+- Validates the logged-in user is the `partner` in that transaction.  
+- **Accept:**  
+  - Update `transactions.status` to `completed`.  
+  - Set both involved `items.status` to `traded`.  
+- **Decline:**  
+  - Update initiator’s item status to `available`.  
+  - Delete the transaction record.  
+- Redirect back to `user_dashboard.php`.
 
-		User Item Posting: For regular users, the file allows them to post new items for trade. Users can input details like the item name, description, value, and quantity. 
-		This data is then inserted into the items table in the database with a default status of 'available'.
+### `trade.php`
+- Facilitates trade initiation: user selects one of their own items and a partner’s item.  
+- Steps:  
+  1. Check session for logged-in user.  
+  2. Retrieve `item_id1` (offered item), `item_id2` (requested item), `partner_id` from `$_POST`.  
+  3. Validate that both items exist, are `available`, and have matching `value`.  
+  4. Generate a unique 16-character `hash_key`.  
+  5. Insert new transaction into `transactions` table with status `active`.  
+  6. Update both items’ statuses to `traded`.  
+  7. Display confirmation with `hash_key`.
 
-		Form Validation: Basic validation checks are performed to ensure that all fields (name, description, value, and quantity) are filled out before submitting the form.
+### `match_items.php`
+- Front-end for selecting items to exchange.  
+- **User Authentication:** Redirect if not logged in.  
+- **Selection Interface:**  
+  - Dropdown for user’s own `available` items.  
+  - Dropdown for selecting a partner user.  
+  - On partner selection, AJAX → calls `get_partner_items.php` to populate partner’s `available` items.  
+  - Submit form posts to `trade.php` to create the transaction.  
+- Validates matching `value` before submission.
 
-		Transaction Handling: Admins can manage transactions (complete or cancel) via the provided form. Upon completion or cancellation, the transaction status is updated in the database.
+### `get_partner_items.php`
+- Returns JSON list of available items for a specified `partner_id`.  
+- Accepts `partner_id` via `$_GET`.  
+- Queries `items` table for rows where `user_id = partner_id` and `status = 'available'`.  
+- Outputs JSON array: `[ { "item_id": ..., "name": ... }, … ]`.  
+- Front-end JS uses this data to populate the partner items dropdown.
 
-		User Interface: The form provides a user-friendly interface for posting items, including fields for name, description, value, and quantity. After posting an item, users are redirected to the user dashboard.		
+### `view_items.php`
+- Displays all available items from all users.  
+- Fetches items where `status = 'available'`.  
+- Shows `item_id`, `name`, `description`, `quantity`, `value`.  
+- Provides a form to enter a `partner_id` and select an item for trade → posts to `match_items.php`.
 
-	
-	-handle_transaction.php - Transaction Handler for User Dashboard
-		
-		Purpose: Manages the acceptance or decline of trade transactions on the user dashboard.
+---
 
-		Key Functionalities:
-			Session Check: Verifies that the user is logged in. Redirects to sign-in if not.
-			
-			Transaction Retrieval: Fetches transaction details using transaction_id.
-			
-			Authorization Check: Ensures the logged-in user is the transaction's partner.
-			
-			Accept Transaction: Updates the transaction to "completed" and marks items as "traded".
-			
-			Decline Transaction: Resets item status to "available" and deletes the transaction.
-			
-			Redirect: After processing, redirects back to the user dashboard.
+## Public Assets
 
-		This file handles transaction actions, ensuring items and transaction statuses are correctly updated based on user input.
-	
-	-trade.php - User Trade Functionality
+All front-end assets are located in the `public/` folder:
 
-		Purpose: Allows users to initiate a trade by offering one item and requesting another from a partner.
+- **CSS**  
+  - `style.css`  
+  - `styles.css`  
+  - Bootstrap (minified CSS)
 
-		Key Functionalities:
-			Session Management: Uses the current user's session to fetch user_id.
+- **JavaScript**  
+  - Bootstrap JS (minified)  
+  - Custom JS (e.g., AJAX for `get_partner_items.php`)
 
-			Form Submission: Takes item_id1 (offered item), item_id2 (requested item), and partner_id (trade partner).
-			
-			Validation:
-				Checks if the partner exists in the database.
-				Verifies that both items are available.
+- **Images**  
+  - Any logos or icons used across pages
 
-			Transaction Recording: If valid, generates a unique 16-character hash and records the trade in the transactions table.
+---
 
-			Confirmation: Displays a success message with the trade's hash key.
-	
-		This file facilitates item exchanges between users by validating and recording trades, generating a unique trade identifier.
-	
-	-match_items.php file allows users to initiate a trade by selecting items to exchange with another active user. Key functionalities include:
+## Getting Started
 
-		User Authentication: Redirects to login if the user is not logged in.
-		
-		Item and Partner Selection: Users can select their item (item_a) and a partner's item (item_b) for trade.
-		
-		Validation: Ensures both items are available and have matching values.
-		
-		Transaction Creation: Creates a transaction with a unique hash key if the items are valid.
-		
-		Item Status Update: Updates item status to "traded" after a successful transaction.
+### Set Up the Database
 
-		Dynamic Partner Item Loading: Uses JavaScript to load the selected partner's items.
+1. **Create a MySQL database** named `barterdb`.  
+2. **Import `barterdb.sql`:**  
+   ```bash
+   mysql -u your_user -p barterdb < barterdb.sql
+**Configure db.php**
+Update the PDO connection parameters (host, dbname, username, password) to match your local environment.
 
-	-get_partner_items.php file 
-		
-		Retrieves available items for trade from a specified partner. 
-		
-		It accepts a partner_id via URL, queries the database for items with the status "available," and returns them in JSON format. 
-		
-		This data is used by the frontend to populate a dropdown menu with the partner's items for selection, allowing users to choose items for trade. 
-		
-		If no partner_id is provided, an empty array is returned.
+## Run a Local Server
+If using XAMPP or a similar local server package, place this project folder in htdocs (for XAMPP) or the appropriate web root directory.
+Start Apache and MySQL services.
+Open your browser and navigate to:
+	http://localhost/BarterDB/index.html
 
-	-view_items.php - User Dashboard: View Available Items
-	
-		This file displays a list of all available items for trade, fetched from the database. 
-		
-		Each item shows its name, description, and quantity. Users can initiate a trade by entering the partner's user ID and submitting a form, which triggers the trade process through match_items.php. 
-		
-		It allows users to view items and start trades with others.
+## Register and Use the Application
+Navigate to Sign Up (signup.html) to create a new user or admin account.
+After signing in via Sign In (signin.html), you will be directed to your dashboard.
+User Dashboard: Post items, view available items, initiate or manage trades.
+Admin Dashboard: Manage users (suspend/delete) and transactions (complete/cancel).
 
-	-public folder for styles, images, javascript :
-		style.css, styles.css, bootstrap and js
+## License
+This project is released under the MIT License.
